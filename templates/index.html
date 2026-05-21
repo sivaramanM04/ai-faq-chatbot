@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+    <title>AI FAQ Chatbot</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+
+    <div class="sidebar">
+
+        <!-- LOGO -->
+
+        <div class="logo">
+
+            <i class="fa-solid fa-robot"></i>
+
+            <h2>AI FAQ Chatbot</h2>
+
+        </div>
+
+        <!-- PROFILE -->
+
+        <div class="profile-card">
+
+            <div class="profile-left">
+
+                <div class="avatar">
+
+                    {{ username[0] }}
+
+                </div>
+
+                <div>
+
+                    <h3>{{ username }}</h3>
+
+                    <p>User Account</p>
+
+                </div>
+
+            </div>
+
+            <!-- MINI LOGOUT -->
+
+            <a href="/logout" class="mini-logout">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+            </a>
+
+        </div>
+
+        <!-- NEW CHAT -->
+
+        <button class="new-chat-btn">
+
+            <i class="fa-solid fa-plus"></i>
+
+            New Chat
+
+        </button>
+
+        <!-- DOMAIN -->
+
+        <div class="domain-section">
+
+            <label>Domain</label>
+
+            <select id="domainSelect">
+
+                <option value="College FAQs">
+                    College FAQs
+                </option>
+
+                <option value="HR Support">
+                    HR Support
+                </option>
+
+                <option value="Customer Support">
+                    Customer Support
+                </option>
+
+                <option value="Product Assistance">
+                    Product Assistance
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- HISTORY -->
+
+        <div class="history-container">
+
+            <div class="section-title">
+
+                Chat History
+
+            </div>
+
+            <div class="history-section"
+            id="historySection">
+
+                {% if chats %}
+
+                    {% for chat in chats %}
+
+                    <div class="history-item">
+
+                        <i class="fa-regular fa-message"></i>
+
+                        <span>
+
+                            {{ chat.message[:30] }}
+
+                        </span>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="empty-history">
+
+                        No chat history
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MAIN CHAT -->
+
+    <div class="main-chat">
+
+        <!-- TOP -->
+
+        <div class="top-bar">
+
+            <h1>
+
+                👋 Hello, {{ username }}
+
+            </h1>
+
+            <p>
+
+                Ask anything related to your selected domain
+
+            </p>
+
+        </div>
+
+        <!-- CHAT BOX -->
+
+        <div class="chat-box"
+        id="chatBox">
+
+            <!-- WELCOME AREA -->
+
+            <div class="welcome-area">
+
+                <div class="message bot-message">
+
+                    Hello 👋 How can I help you today?
+
+                </div>
+
+                <!-- DYNAMIC SUGGESTIONS -->
+
+                <div class="chat-suggestions"
+                id="suggestionContainer">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- INPUT -->
+
+        <div class="chat-input-area">
+
+            <input
+            type="text"
+            id="userInput"
+            placeholder="Ask a question...">
+
+            <button id="sendBtn">
+
+                <i class="fa-solid fa-paper-plane"></i>
+
+            </button>
+
+        </div>
+
+        <!-- FOOTER -->
+
+        <div class="footer-text">
+
+            AI responses may contain mistakes.
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
