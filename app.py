@@ -17,6 +17,8 @@ from flask_login import current_user
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 
+from authlib.integrations.flask_client import OAuth
+
 from dotenv import load_dotenv
 
 import google.generativeai as genai
@@ -39,11 +41,44 @@ app.config['SECRET_KEY'] = os.getenv(
     'SECRET_KEY'
 )
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    'DATABASE_URL'
+)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# =========================================
+# DATABASE
+# =========================================
+
 db = SQLAlchemy(app)
+
+# =========================================
+# GOOGLE OAUTH
+# =========================================
+
+oauth = OAuth(app)
+
+google = oauth.register(
+
+    name='google',
+
+    client_id=os.getenv(
+        "GOOGLE_CLIENT_ID"
+    ),
+
+    client_secret=os.getenv(
+        "GOOGLE_CLIENT_SECRET"
+    ),
+
+    server_metadata_url=
+    'https://accounts.google.com/.well-known/openid-configuration',
+
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+
+)
 
 # =========================================
 # LOGIN MANAGER
@@ -250,6 +285,71 @@ def login():
     )
 
 # =========================================
+# GOOGLE LOGIN
+# =========================================
+
+@app.route('/google-login')
+def google_login():
+
+    redirect_uri = url_for(
+        'google_authorize',
+        _external=True
+    )
+
+    return google.authorize_redirect(
+        redirect_uri
+    )
+
+# =========================================
+# GOOGLE AUTHORIZE
+# =========================================
+
+@app.route('/google-authorize')
+def google_authorize():
+
+    token = google.authorize_access_token()
+
+    user_info = token['userinfo']
+
+    email = user_info['email']
+
+    username = user_info['name']
+
+    # CHECK USER EXISTS
+
+    user = User.query.filter_by(
+        email=email
+    ).first()
+
+    # CREATE USER IF NOT EXISTS
+
+    if not user:
+
+        user = User(
+
+            username=username,
+
+            email=email,
+
+            password=generate_password_hash(
+                "google-login"
+            )
+
+        )
+
+        db.session.add(user)
+
+        db.session.commit()
+
+    # LOGIN USER
+
+    login_user(user)
+
+    return redirect(
+        url_for('chatbot')
+    )
+
+# =========================================
 # LOGOUT
 # =========================================
 
@@ -277,9 +377,6 @@ def chatbot():
         ChatHistory.id.desc()
     ).all()
 
-    print("CHAT HISTORY:")
-    print(chats)
-
     return render_template(
 
         'index.html',
@@ -306,8 +403,6 @@ def chat():
 
     try:
 
-        # DOMAIN BASED PROMPT
-
         prompt = f"""
         You are an AI assistant for {domain}.
 
@@ -333,7 +428,7 @@ def chat():
 
         print(e)
 
-    # SAVE CHAT HISTORY
+    # SAVE CHAT
 
     new_chat = ChatHistory(
 

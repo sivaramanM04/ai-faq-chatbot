@@ -664,3 +664,37 @@ body{
 
     color:gray;
 }
+
+.google-btn{
+
+    width:100%;
+
+    padding:15px;
+
+    border:1px solid #ddd;
+
+    border-radius:14px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin-top:15px;
+
+    text-decoration:none;
+
+    color:black;
+
+    background:white;
+
+    transition:0.3s;
+}
+
+.google-btn:hover{
+
+    background:#f5f5f5;
+}
